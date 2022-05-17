@@ -9,6 +9,7 @@ const connectDB = require("./db/connect");
 
 // routers
 const authRouter = require("./routes/auth");
+const homeRouter = require("./routes/home");
 const zinesRouter = require("./routes/zines");
 const usersRouter = require("./routes/users");
 
@@ -23,6 +24,7 @@ app.use(express.json());
 
 // routes
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/home", homeRouter);
 app.use("/api/v1/zines", authenticateUser, zinesRouter);
 app.use("/api/v1/users", authenticateUser, usersRouter);
 

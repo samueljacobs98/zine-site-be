@@ -20,7 +20,7 @@ const ZineSchema = new mongoose.Schema(
       required: [true, "Please provide user"],
     },
   },
-  { timestamps }
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("Job", JobSchema);
+module.exports = mongoose.model("Zine", ZineSchema);

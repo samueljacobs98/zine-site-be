@@ -1,5 +1,7 @@
 const Zine = require("../models/Zine");
+const Series = require("../models/Series");
 const { StatusCodes } = require("http-status-codes");
+const { NotFoundError } = require("../errors");
 
 // add a new zine to the database
 // attribute createdBy to the logged in user
@@ -15,19 +17,47 @@ const createZine = async (req, res) => {
 };
 
 // get all zines of the logged in user
-const getAllZines = (req, res) => {
-  res.send("get all zines");
+const getAllZines = async (req, res) => {
+  const zines = await Zine.find({ createdBy: req.user.userId }).sort(
+    "createdAt"
+  );
+  res.status(StatusCodes.OK).json({ zines, count: zines.length });
 };
 
-// get a zine by id
-const getZineById = (req, res) => {
-  res.send("get zine by id");
+// get any zine by id
+const getZineById = async (req, res) => {
+  const {
+    params: { id: zineId },
+  } = req;
+
+  const zine = await Zine.findOne({
+    _id: zineId,
+  });
+
+  if (!zine) {
+    throw new NotFoundError(`No job with id ${zineId}`);
+  }
+
+  res.status(StatusCodes.OK).json({ zine });
 };
 
 // delete a zine by id
 // must be a zine created by logged in user
-const deleteZineById = (req, res) => {
-  res.send("delete zine by id");
+const deleteZineById = async (req, res) => {
+  const {
+    user: { userId },
+    params: { id: zineId },
+  } = req;
+
+  try {
+    await Zine.findByIdAndRemove({
+      _id: zineId,
+      createdBy: userId,
+    });
+    res.status(StatusCodes.OK).send("Zine deleted");
+  } catch (error) {
+    throw new NotFoundError(`No zine with given id ${zineId}`);
+  }
 };
 
 // update zine info
@@ -39,13 +69,32 @@ const updateZineById = (req, res) => {
 // create a series
 // attribute series to logged in user
 // zines added must be created by logged in user
-const createSeries = (req, res) => {
-  res.send("create new series");
+const createSeries = async (req, res) => {
+  req.body.createdBy = req.user.userId;
+
+  try {
+    const series = await Series.create({ ...req.body });
+    res.status(StatusCodes.CREATED).json(series);
+  } catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).send("please provide valid details");
+  }
 };
 
 // get a series of zines by seriesId
-const getSeriesById = (req, res) => {
-  res.send("get series by id");
+const getSeriesById = async (req, res) => {
+  const {
+    params: { id: seriesId },
+  } = req;
+
+  const series = await Series.findOne({
+    _id: seriesId,
+  });
+
+  if (!series) {
+    throw new NotFoundError(`No series with id ${seriesId}`);
+  }
+
+  res.status(StatusCodes.OK).json({ series });
 };
 
 // update series info based on id
@@ -56,8 +105,21 @@ const updateSeriesById = (req, res) => {
 
 // delete series based on id
 // must be a series created by the user
-const deleteSeriesById = (req, res) => {
-  res.send("delete series by id");
+const deleteSeriesById = async (req, res) => {
+  const {
+    user: { userId },
+    params: { id: seriesId },
+  } = req;
+
+  try {
+    await Series.findByIdAndRemove({
+      _id: seriesId,
+      createdBy: userId,
+    });
+    res.status(StatusCodes.OK).send("Series deleted");
+  } catch (error) {
+    throw new NotFoundError(`No series with given id ${seriesId}`);
+  }
 };
 
 module.exports = {

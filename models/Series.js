@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
-const ZineSchema = new mongoose.Schema(
+const SeriesSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, "Please provide a zine title"],
+      required: [true, "Please provide a series title"],
     },
     description: {
       type: String,
@@ -13,18 +13,19 @@ const ZineSchema = new mongoose.Schema(
     tags: {
       type: [String],
       index: true,
+      default: null,
     },
     createdBy: {
       type: mongoose.Types.ObjectId,
       ref: "User",
       required: [true, "Please provide user"],
     },
-    seriesId: {
-      type: mongoose.Types.ObjectId,
-      ref: "Series",
+    zines: {
+      type: [mongoose.Types.ObjectId],
+      ref: "Zine",
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Zine", ZineSchema);
+module.exports = mongoose.model("Series", SeriesSchema);
